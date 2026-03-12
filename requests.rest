@@ -1,0 +1,11 @@
+POST http://localhost:3001/api/books/ HTTP/1.1
+content-type: application/json
+
+{
+    "title": "Harry Potter and the Philosopher's Stone",
+    "author": ["J. K. Rowling"],
+    "year": "1997",
+    "genres": ["Fiction"],
+    "status": "Read",
+    "id": "3",
+}
