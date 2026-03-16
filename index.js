@@ -1,60 +1,44 @@
-const express = require("express")
-const app = express()
-const PORT = 3001
+const app = require('./app') // the actual Express application
+const config = require('./utils/config')
+const logger = require('./utils/logger')
 
-let books = [
-  {
-    title: "The Lord of the Rings",
-    authors: ["J. R. R. Tolkien"],
-    year: 1945,
-    genres: ["classics"],
-    status: "Read",
-    id: "1",
-  },
-  {
-    title: "The Pragmatic Programmer: Your Journey to Mastery",
-    author: ["David Thomas", "Andrew Hunt"],
-    year: 1999,
-    genres: ["Computer Science"],
-    status: "Not started",
-    id: "2",
-  },
-]
-
-app.use(express.json())
-
-app.get("/", (req, res) => {
-  res.send("Hello world!")
+app.listen(config.PORT, () => {
+  logger.info(`Server running on port ${config.PORT}`)
 })
 
-app.get("/api/books", (req, res) => {
-  res.json(books)
-})
+// let books = [
+//   {
+//     title: 'The Lord of the Rings',
+//     authors: ['J. R. R. Tolkien'],
+//     year: 1945,
+//     genres: ['classics'],
+//     status: 'Read',
+//     id: '1',
+//   },
+//   {
+//     title:
+//       'The Pragmatic Programmer: Your Journey to Mastery',
+//     author: ['David Thomas', 'Andrew Hunt'],
+//     year: 1999,
+//     genres: ['Computer Science'],
+//     status: 'Not started',
+//     id: '2',
+//   },
+// ]
 
-app.get("/api/books/:id", (req, res) => {
-  const id = req.params.id
-  const book = books.find((book) => book.id === id)
+// const generateId = () => {
+//   const maxId =
+//     books.length > 0
+//       ? Math.max(...books.map((b) => Number(b.id)))
+//       : 0
 
-  if (book) {
-    res.json(book)
-  } else {
-    res.status(404).end()
-  }
-})
+//   return String(maxId + 1)
+// }
 
-app.delete("/api/books/:id", (req, res) => {
-  const id = req.params.id
-  books = books.filter((book) => book.id !== id)
-
-  res.status(204).end()
-})
-
-app.post("/api/books/", (req, res) => {
-  const book = req.body
-  console.log(book)
-  res.json(book)
-})
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
-})
+// const requestLogger = (req, res, next) => {
+//   console.log('Method:', req.method)
+//   console.log('Path:  ', req.path)
+//   console.log('Body:  ', req.body)
+//   console.log('---')
+//   next()
+// }

@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/books/ HTTP/1.1
+POST http://localhost:3001/api/books/
 content-type: application/json
 
 {
@@ -6,6 +6,9 @@ content-type: application/json
     "author": ["J. K. Rowling"],
     "year": "1997",
     "genres": ["Fiction"],
-    "status": "Read",
-    "id": "3",
+    "status": "Read"
 }
+
+######
+
+GET http://localhost:3001/api/books/
