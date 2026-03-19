@@ -1,6 +1,6 @@
 // db.js
 const { Pool } = require('pg')
-require('dotenv').config()
+const { DATABASE_URI } = require('./utils/config')
 
 // const pool = new Pool({
 //   host: process.env.DB_HOST,
@@ -10,7 +10,7 @@ require('dotenv').config()
 //   database: process.env.DB_NAME,
 // })
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: DATABASE_URI,
 })
 
 module.exports = pool
