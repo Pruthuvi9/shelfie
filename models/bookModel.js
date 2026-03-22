@@ -42,7 +42,7 @@ const getOneBook = async (id) => {
 }
 
 const deleteAllBooks = async () => {
-  return await pool.query('TRUNCATE TABLE books')
+  return await pool.query('TRUNCATE TABLE books CASCADE')
 }
 
 const createBook = async ({
@@ -106,9 +106,18 @@ const createBook = async ({
   }
 }
 
+const deleteBook = async (id) => {
+  const result = await pool.query(
+    'DELETE FROM books WHERE id = $1 RETURNING id',
+    [id],
+  )
+  return result
+}
+
 module.exports = {
   getAllBooks,
   getOneBook,
   deleteAllBooks,
   createBook,
+  deleteBook,
 }

@@ -24,9 +24,9 @@ app.get('/', (req, res) => {
   res.send('Hello world!')
 })
 
-app.use('/api/books', booksRouter)
+app.use('/api/v1/books', booksRouter)
 
-app.use('/api/users', usersRouter)
+app.use('/api/v1/users', usersRouter)
 
 app.use(middleware.unknownEndpoint)
 

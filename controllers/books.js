@@ -8,6 +8,7 @@ const {
   getAllBooks,
   getOneBook,
   createBook,
+  deleteBook,
 } = require('../models/bookModel')
 
 booksRouter.get('/', async (req, res) => {
@@ -21,14 +22,25 @@ booksRouter.get('/', async (req, res) => {
 })
 
 booksRouter.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params
-    const book = await getOneBook(id)
-    if (!book)
-      return res.status(404).json({ error: 'Not found' })
+  const book = await getOneBook(req.params.id)
+  if (book) {
     res.json(book)
-  } catch (err) {
-    console.log('error: ', err)
+  } else {
+    return res.status(404).json({ error: 'Not found' })
+  }
+})
+
+booksRouter.delete('/:id', async (req, res) => {
+  try {
+    const result = await deleteBook(req.params.id)
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: 'Book not found' })
+    }
+    res.status(204).send()
+  } catch (error) {
+    console.error(error)
     res.status(500).json({ error: 'Database error' })
   }
 })
@@ -37,6 +49,9 @@ booksRouter.post(
   '/',
   validate(bookSchema),
   async (req, res) => {
+    // this can be simplified with express 5
+    // express automatically calls next middleware when an error is thrown
+
     try {
       const book = await createBook(req.validatedData)
       // console.log(book)
