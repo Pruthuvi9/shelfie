@@ -22,6 +22,10 @@ booksRouter.get('/', async (req, res) => {
 })
 
 booksRouter.get('/:id', async (req, res) => {
+  if (isNaN(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid id' })
+  }
+
   const book = await getOneBook(req.params.id)
   if (book) {
     res.json(book)

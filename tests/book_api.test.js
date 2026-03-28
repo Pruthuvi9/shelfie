@@ -67,7 +67,7 @@ test('a specific book is within the returned books', async () => {
   )
 })
 
-describe.only('viewing a specific book', () => {
+describe('viewing a specific book', () => {
   test('succeeds with a valid id', async () => {
     const booksAtStart = await getAllBooks()
     const bookToView = booksAtStart[0]
@@ -79,10 +79,52 @@ describe.only('viewing a specific book', () => {
     assert.deepStrictEqual(result.body, bookToView)
   })
 
-  // test('fails with a status code 404 if book does not exist', async () => {
+  test('fails with a status code 404 if book does not exist', async () => {
+    const result = await api.get('/api/v1/books/1000')
+    assert.strictEqual(result.status, 404)
+    assert.strictEqual(result.body.error, 'Not found')  
+  })
 
-  // })
+  test('fails with a status code 400 if id is not a number', async () => {
+    const result = await api.get('/api/v1/books/not-a-number')
+    assert.strictEqual(result.status, 400)
+    assert.strictEqual(result.body.error, 'Invalid id')
+  })
 })
+
+describe('adding a book', () => {
+  test('a valid book can be added', async () => {
+    const newBook = {
+      authors: ['Martin Kleppmann'],
+      genres: ['Software Engineering', 'Computer Science'],
+      status: 'Not started',
+      year: 2017,
+      title:
+        'Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems',
+    }
+
+    await api.post('/api/v1/books').send(newBook).expect(201)
+    .expect('Content-Type', /application\/json/)
+
+    const booksAtEnd = await getAllBooks()
+    assert.strictEqual(booksAtEnd.length, helper.initialBooks.length + 1)
+    assert.strictEqual(booksAtEnd[booksAtEnd.length - 1].title, newBook.title)
+  })
+
+  test('fails with a status code 400 if data is invalid', async () => {
+    const newBook = {
+      authors: ['Martin Kleppmann'],
+      genres: ['Software Engineering', 'Computer Science'],
+      status: 'Not started',
+      year: 2017,
+    }
+    await api.post('/api/v1/books').send(newBook).expect(400)
+  })
+})
+
+// describe('deleting a book', () => {
+//   test()
+// })
 
 test('a valid book can be added', async () => {
   const newBook = {
