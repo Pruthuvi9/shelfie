@@ -8,8 +8,21 @@ const app = express()
 app.use(express.json())
 
 morgan.token('body', function (req, res) {
-  return JSON.stringify(req.body)
+  if (req.body && typeof req.body === 'object') {
+    const sanitizedBody = { ...req.body }
+    if (sanitizedBody.password)
+      sanitizedBody.password = '******'
+    if (sanitizedBody.token) sanitizedBody.token = '******'
+    return JSON.stringify(sanitizedBody)
+  }
+  return ''
 })
+
+// app.use(morgan('combined', {
+//   skip: function (req, res) {
+//     return req.url === '/api/login' || req.url === '/api/register';
+//   }
+// }));
 
 if (process.env.NODE_ENV !== 'test') {
   app.use(
@@ -25,7 +38,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/v1/books', booksRouter)
-
 app.use('/api/v1/users', usersRouter)
 
 app.use(middleware.unknownEndpoint)

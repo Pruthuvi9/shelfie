@@ -35,6 +35,10 @@ booksRouter.get('/:id', async (req, res) => {
 })
 
 booksRouter.delete('/:id', async (req, res) => {
+  if (isNaN(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid id' })
+  }
+
   try {
     const result = await deleteBook(req.params.id)
     if (result.rows.length === 0) {
@@ -45,6 +49,7 @@ booksRouter.delete('/:id', async (req, res) => {
     res.status(204).send()
   } catch (error) {
     console.error(error)
+
     res.status(500).json({ error: 'Database error' })
   }
 })

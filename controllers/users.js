@@ -1,6 +1,11 @@
+const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const pool = require('../db')
-const { getAllUsers } = require('../models/userModel')
+const {
+  getAllUsers,
+  createUser,
+  deleteUser,
+} = require('../models/userModel')
 const { validate } = require('../utils/middleware')
 const {
   userSchema,
@@ -22,27 +27,46 @@ usersRouter.post(
   async (req, res) => {
     const { email, name, password } = req.validatedData
 
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(
+      password,
+      saltRounds,
+    )
+
     try {
-      await pool.query('BEGIN')
-      const userResult = await pool.query(
-        `INSERT INTO users (email, name, password) VALUES ($1, $2, $3) RETURNING id`,
-        [email, name, password],
-      )
-
-      const userId = userResult.rows[0].id
-
-      await pool.query('COMMIT')
-      res.status(201).json({
-        id: userId,
+      let newUser = await createUser({
         email,
         name,
+        passwordHash,
       })
+      res.status(201).json(newUser)
     } catch (err) {
-      await pool.query('ROLLBACK')
-      console.log('error:', err)
+      if (err.message === 'Email already in use') {
+        return res.status(409).json({ error: err.message }) // 409 Conflict
+      }
       res.status(500).json({ error: 'Database error' })
     }
   },
 )
+
+usersRouter.delete('/:id', async (req, res) => {
+  if (isNaN(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid id' })
+  }
+
+  try {
+    const result = await deleteUser(req.params.id)
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: 'User not found' })
+    }
+    res.status(204).send()
+  } catch (error) {
+    console.error(error)
+
+    res.status(500).json({ error: 'Database error' })
+  }
+})
 
 module.exports = usersRouter
