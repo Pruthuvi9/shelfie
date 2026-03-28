@@ -1,6 +1,6 @@
 # Shelfie — Requirements Document
 
-> A personal book tracking app built as a portfolio project to consolidate Full Stack Open (Parts 2–7) concepts.
+> A personal book tracking app built as a portfolio project to consolidate Full Stack Open (Parts 2–6) concepts.
 
 ---
 
