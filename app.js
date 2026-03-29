@@ -3,6 +3,7 @@ var morgan = require('morgan')
 const middleware = require('./utils/middleware')
 const booksRouter = require('./controllers/books')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
 const app = express()
 app.use(express.json())
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/books', booksRouter)
 app.use('/api/v1/users', usersRouter)
+app.use('/api/v1/login', loginRouter)
 
 app.use(middleware.unknownEndpoint)
 

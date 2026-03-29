@@ -4,6 +4,9 @@ const getAllUsers = async () => {
   const result = await pool.query(
     'SELECT id, email, name FROM users',
   )
+  const result = await pool.query(
+    'SELECT id, email, name FROM users',
+  )
   return result.rows
 }
 
@@ -49,9 +52,32 @@ const deleteUser = async (id) => {
   return result
 }
 
+const getUserbyEmail = async (email) => {
+  const result = await pool.query(
+    'SELECT * FROM users WHERE email = $1',
+    [email],
+  )
+  return {
+    id: result.rows[0].id,
+    email: result.rows[0].email,
+    name: result.rows[0].name,
+    passwordHash: result.rows[0].password_hash,
+  }
+}
+
+const getUserbyId = async (id) => {
+  const result = await pool.query(
+    'SELECT id, email, name FROM users WHERE id = $1',
+    [id],
+  )
+  return result.rows[0]
+}
+
 module.exports = {
   getAllUsers,
   deleteAll,
   createUser,
   deleteUser,
+  getUserbyEmail,
+  getUserbyId,
 }

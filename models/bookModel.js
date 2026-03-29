@@ -51,6 +51,7 @@ const createBook = async ({
   status,
   title,
   year,
+  userId,
 }) => {
   try {
     await pool.query('BEGIN')
@@ -87,6 +88,12 @@ const createBook = async ({
         [bookId, genreResult.rows[0].id],
       )
     }
+
+    // 4. Add to user_books
+    await pool.query(
+      'INSERT INTO user_books (user_id, book_id) VALUES ($1, $2)',
+      [userId, bookId],
+    )
 
     await pool.query('COMMIT')
 

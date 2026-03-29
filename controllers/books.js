@@ -1,5 +1,5 @@
+const jwt = require('jsonwebtoken')
 const booksRouter = require('express').Router()
-// const pool = require('../db')
 const { validate } = require('../utils/middleware')
 const {
   bookSchema,
@@ -10,6 +10,18 @@ const {
   createBook,
   deleteBook,
 } = require('../models/bookModel')
+const { getUserbyId } = require('../models/userModel')
+
+const getTokenFrom = (req) => {
+  const authorization = req.get('authorization')
+  if (
+    authorization &&
+    authorization.startsWith('Bearer ')
+  ) {
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
 
 booksRouter.get('/', async (req, res) => {
   try {
@@ -61,8 +73,28 @@ booksRouter.post(
     // this can be simplified with express 5
     // express automatically calls next middleware when an error is thrown
 
+    const decodedToken = jwt.verify(
+      getTokenFrom(req),
+      process.env.SECRET,
+    )
+    // console.log('decodedToken', decodedToken)
+    if (!decodedToken.id) {
+      return res
+        .status(401)
+        .json({ error: 'token invalid' })
+    }
+    const user = await getUserbyId(decodedToken.id)
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: 'UserId missing or not valid' })
+    }
+
     try {
-      const book = await createBook(req.validatedData)
+      const book = await createBook({
+        ...req.validatedData,
+        userId: user.id,
+      })
       // console.log(book)
       res.status(201).json(book)
     } catch (err) {
