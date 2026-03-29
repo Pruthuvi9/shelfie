@@ -4,9 +4,6 @@ const getAllUsers = async () => {
   const result = await pool.query(
     'SELECT id, email, name FROM users',
   )
-  const result = await pool.query(
-    'SELECT id, email, name FROM users',
-  )
   return result.rows
 }
 

@@ -1,11 +1,9 @@
 const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
-const pool = require('../db')
 const {
   getAllUsers,
   createUser,
   deleteUser,
-  getUser,
   getUserbyId,
 } = require('../models/userModel')
 const { validate } = require('../utils/middleware')
@@ -56,20 +54,10 @@ usersRouter.post(
 
     try {
       let newUser = await createUser({
-    const saltRounds = 10
-    const passwordHash = await bcrypt.hash(
-      password,
-      saltRounds,
-    )
-
-    try {
-      let newUser = await createUser({
         email,
         name,
         passwordHash,
-        passwordHash,
       })
-      res.status(201).json(newUser)
       res.status(201).json(newUser)
     } catch (err) {
       if (err.message === 'Email already in use') {
