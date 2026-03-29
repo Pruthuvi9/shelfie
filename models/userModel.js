@@ -16,14 +16,16 @@ const createUser = async ({
   name,
   passwordHash,
 }) => {
+  const client = await pool.connect()
+
   try {
-    await pool.query('BEGIN')
+    await client.query('BEGIN')
     const userResults = await pool.query(
       `INSERT INTO users (email, name, password_hash) VALUES ($1, $2, $3) RETURNING id`,
       [email, name, passwordHash],
     )
     const userId = userResults.rows[0].id
-    await pool.query('COMMIT')
+    await client.query('COMMIT')
     const user = {
       id: userId,
       email,
@@ -31,13 +33,15 @@ const createUser = async ({
     }
     return user
   } catch (error) {
-    await pool.query('ROLLBACK')
+    await client.query('ROLLBACK')
     if (error.code === '23505') {
       throw new Error('Email already in use', {
         cause: error,
       })
     }
     throw error
+  } finally {
+    client.release()
   }
 }
 
@@ -54,12 +58,8 @@ const getUserbyEmail = async (email) => {
     'SELECT * FROM users WHERE email = $1',
     [email],
   )
-  return {
-    id: result.rows[0].id,
-    email: result.rows[0].email,
-    name: result.rows[0].name,
-    passwordHash: result.rows[0].password_hash,
-  }
+
+  return result
 }
 
 const getUserbyId = async (id) => {

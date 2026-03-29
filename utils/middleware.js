@@ -27,8 +27,21 @@ const validate = (schema) => (req, res, next) => {
   next()
 }
 
+const getTokenFrom = (req, res, next) => {
+  const authorization = req.get('authorization')
+  if (
+    authorization &&
+    authorization.startsWith('Bearer ')
+  ) {
+    req.token = authorization.replace('Bearer ', '')
+  }
+
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  validate
+  validate,
+  getTokenFrom,
 }

@@ -1,0 +1,1 @@
+ALTER TABLE books ADD CONSTRAINT books_title_year_unique UNIQUE (title, year);

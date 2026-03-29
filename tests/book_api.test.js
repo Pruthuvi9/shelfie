@@ -3,6 +3,7 @@ const {
   after,
   beforeEach,
   describe,
+  before,
 } = require('node:test')
 const assert = require('node:assert')
 const supertest = require('supertest')
@@ -26,15 +27,31 @@ const api = supertest(app)
 describe('when there is initially some books saved', () => {
   beforeEach(async () => {
     await pool.query('DELETE FROM books')
+    await pool.query('DELETE FROM users')
     // await pool.query('TRUNCATE TABLE books CASCADE')
 
+    let testUser = {
+      email: 'test_user@test.com',
+      name: 'Test User',
+      password: 'mypassword',
+    }
+
+    await api.post('/api/v1/auth/register').send(testUser)
+
+    const res = await api.post('/api/v1/auth/login').send({
+      email: testUser.email,
+      password: testUser.password,
+    })
+
+    // console.log(res)
+
     for (let book of helper.initialBooks) {
-      await createBook({ ...book })
+      await createBook({ ...book, userId: res.body.id })
       // console.log('saved book')
     }
   })
 
-  test('books are returned as json', async () => {
+  test.only('books are returned as json', async () => {
     await api
       .get('/api/v1/books')
       .expect(200)
@@ -129,7 +146,7 @@ describe('when there is initially one user in db', () => {
     }
 
     await api
-      .post('/api/v1/users')
+      .post('/api/v1/auth/register')
       .send(newUser)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -155,7 +172,7 @@ describe('when there is initially one user in db', () => {
     }
 
     const result = await api
-      .post('/api/v1/users')
+      .post('/api/v1/auth/register')
       .send(newUser)
       .expect(409)
       .expect('Content-Type', /application\/json/)
@@ -171,6 +188,33 @@ describe('when there is initially one user in db', () => {
     )
   })
 })
+
+// describe('when a user is logged in', async () => {
+//   await pool.query('DELETE FROM users')
+
+//   let token = null
+
+//   before(async () => {
+//     let testUser = {
+//       email: 'test_user@test.com',
+//       name: 'Test User',
+//       password: 'mypassword',
+//     }
+
+//     await api.post('/api/v1/auth/register').send(testUser)
+
+//     const res = await api.post('/api/v1/auth/login').send({
+//       email: testUser.email,
+//       password: testUser.password,
+//     })
+
+//     token = res.token
+//   })
+
+//   test('a new book can be added', async () => {
+//     let
+//   })
+// })
 
 after(async () => {
   await pool.end()

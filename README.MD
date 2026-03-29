@@ -147,7 +147,7 @@ The project is intentionally scoped to cover key concepts from Full Stack Open P
 
 ## API Requirements
 
-Base path: `/api`
+Base path: `/api/v1`
 
 All protected endpoints require an `Authorization: Bearer <token>` header.
 
@@ -155,18 +155,18 @@ All protected endpoints require an `Authorization: Bearer <token>` header.
 
 | Method | Endpoint             | Auth   | Description         |
 | ------ | -------------------- | ------ | ------------------- |
-| `POST` | `/api/auth/register` | Public | Register a new user |
-| `POST` | `/api/auth/login`    | Public | Log in, receive JWT |
+| `POST` | `/api/v1/auth/register` | Public | Register a new user |
+| `POST` | `/api/v1/auth/login`    | Public | Log in, receive JWT |
 
 ### Books
 
 | Method   | Endpoint         | Auth      | Description                    |
 | -------- | ---------------- | --------- | ------------------------------ |
-| `GET`    | `/api/books`     | Protected | Get all books for current user |
-| `GET`    | `/api/books/:id` | Protected | Get a single book by ID        |
-| `POST`   | `/api/books`     | Protected | Add a new book                 |
-| `PUT`    | `/api/books/:id` | Protected | Update a book                  |
-| `DELETE` | `/api/books/:id` | Protected | Delete a book                  |
+| `GET`    | `/api/v1/books`     | Protected | Get all books for current user |
+| `GET`    | `/api/v1/books/:id` | Protected | Get a single book by ID        |
+| `POST`   | `/api/v1/books`     | Protected | Add a new book                 |
+| `PUT`    | `/api/v1/books/:id` | Protected | Update a book                  |
+| `DELETE` | `/api/v1/books/:id` | Protected | Delete a book                  |
 
 ---
 

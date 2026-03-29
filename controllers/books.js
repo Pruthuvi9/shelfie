@@ -12,16 +12,16 @@ const {
 } = require('../models/bookModel')
 const { getUserbyId } = require('../models/userModel')
 
-const getTokenFrom = (req) => {
-  const authorization = req.get('authorization')
-  if (
-    authorization &&
-    authorization.startsWith('Bearer ')
-  ) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
+// const getTokenFrom = (req) => {
+//   const authorization = req.get('authorization')
+//   if (
+//     authorization &&
+//     authorization.startsWith('Bearer ')
+//   ) {
+//     return authorization.replace('Bearer ', '')
+//   }
+//   return null
+// }
 
 booksRouter.get('/', async (req, res) => {
   try {
@@ -74,7 +74,7 @@ booksRouter.post(
     // express automatically calls next middleware when an error is thrown
 
     const decodedToken = jwt.verify(
-      getTokenFrom(req),
+      req.token,
       process.env.SECRET,
     )
     // console.log('decodedToken', decodedToken)
@@ -98,7 +98,11 @@ booksRouter.post(
       // console.log(book)
       res.status(201).json(book)
     } catch (err) {
-      console.log('error:', err)
+      if (err.message === 'ALREADY_IN_SHELF') {
+        return res
+          .status(409)
+          .json({ error: 'Book already on your shelf' })
+      }
       res.status(500).json({ error: 'Database error' })
     }
   },

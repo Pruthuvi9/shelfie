@@ -53,23 +53,27 @@ const createBook = async ({
   year,
   userId,
 }) => {
+  const client = await pool.connect()
+
   try {
-    await pool.query('BEGIN')
-    const bookResult = await pool.query(
-      `INSERT INTO books (title, year, status) VALUES ($1, $2, $3) RETURNING id`,
-      [title, year, status],
+    await client.query('BEGIN')
+    const bookResult = await client.query(
+      `INSERT INTO books (title, year) VALUES ($1, $2)
+       ON CONFLICT (title, year) DO UPDATE SET title = EXCLUDED.title
+       RETURNING id`,
+      [title, year],
     )
     const bookId = bookResult.rows[0].id
 
     // 2. Insert author and link it
     for (const authorName of authors) {
-      const authorResult = await pool.query(
+      const authorResult = await client.query(
         `INSERT INTO authors (name) VALUES ($1)
          ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
          RETURNING id`,
         [authorName],
       )
-      await pool.query(
+      await client.query(
         `INSERT INTO book_authors (book_id, author_id) VALUES ($1, $2)`,
         [bookId, authorResult.rows[0].id],
       )
@@ -77,25 +81,31 @@ const createBook = async ({
 
     // 3. Same for genre
     for (const genreName of genres) {
-      const genreResult = await pool.query(
+      const genreResult = await client.query(
         `INSERT INTO genres (name) VALUES ($1)
          ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
          RETURNING id`,
         [genreName],
       )
-      await pool.query(
+      await client.query(
         `INSERT INTO book_genres (book_id, genre_id) VALUES ($1, $2)`,
         [bookId, genreResult.rows[0].id],
       )
     }
 
     // 4. Add to user_books
-    await pool.query(
-      'INSERT INTO user_books (user_id, book_id) VALUES ($1, $2)',
-      [userId, bookId],
+    const userBookResult = await client.query(
+      `INSERT INTO user_books (user_id, book_id, status) VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, book_id) DO NOTHING
+       RETURNING *`,
+      [userId, bookId, status],
     )
 
-    await pool.query('COMMIT')
+    if (userBookResult.rows.length === 0) {
+      throw new Error('ALREADY_IN_SHELF')
+    }
+
+    await client.query('COMMIT')
 
     const book = {
       id: bookId,
@@ -108,8 +118,10 @@ const createBook = async ({
     // console.log(book)
     return book
   } catch (error) {
-    await pool.query('ROLLBACK')
+    await client.query('ROLLBACK')
     throw error
+  } finally {
+    client.release()
   }
 }
 

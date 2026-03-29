@@ -6,12 +6,19 @@ const loginRouter = require('express').Router()
 loginRouter.post('/', async (req, res) => {
   const { email, password } = req.body
 
-  const user = await getUserbyEmail(email)
-//   console.log(user)
+  const userResult = await getUserbyEmail(email)
+  //   console.log(user)
+  if (userResult.rows.length === 0) {
+    return res.status(404).json({ error: 'User not found' })
+  }
+
+  const user = userResult.rows[0]
+  // console.log(user)
+
   const passwordCorrect =
     user === null
       ? false
-      : await bcrypt.compare(password, user.passwordHash)
+      : await bcrypt.compare(password, user.password_hash)
 
   if (!(user && passwordCorrect)) {
     return res.status(401).json({
@@ -27,9 +34,8 @@ loginRouter.post('/', async (req, res) => {
   const token = jwt.sign(userForToken, process.env.SECRET)
 
   res.status(200).send({
+    ...user,
     token,
-    email: user.email,
-    name: user.name,
   })
 })
 
